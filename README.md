@@ -1,9 +1,9 @@
-# CopilotKit Demo App
+# Adsense Dash (Demo)
 
 This demo application highlights the capabilities of CopilotKit by demonstrating how to build an app that emphasizes authorization, supports multiple operations, and incorporates generative UI elements. The banking application scenario serves as a practical example of these features in action.
 
 ## Preview
-![alt text](assets/image.png)
+![alt text](/demo-banking/assets/image.png)
 ## Installation and running
 
 To get started, install the package and run the development server:
