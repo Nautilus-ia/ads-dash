@@ -24,11 +24,11 @@ export function CopilotKitWrapper({ children }: { children: React.ReactNode }) {
       <CopilotPopup
         defaultOpen={true}
         instructions={
-          "You are assisting the user as best as you can. Answer in the best way possible given the data you have."
+          "Você é um assistente, responda de maneira clara as informações financeiras presentes"
         }
         labels={{
-          title: "Bankito Assistant",
-          initial: "Hi, I'm the Bankito Copilot, built with copilotkit.  How can I help?  You can try one of these suggestions, or ask me anything.",
+          title: "Ads assistant",
+          initial: "Olá, eu sou o Copilot da plataforma. Como posso ajudar?",
         }}
       />
     </CopilotKit>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, LayoutDashboard, Users } from "lucide-react";
+import { AppWindow, CreditCard, LayoutDashboard, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -130,7 +130,7 @@ export function LayoutComponent({ children }: LayoutProps) {
     <div className="flex h-screen overflow-hidden">
       <aside className="flex w-16 flex-col items-center space-y-8 border-r bg-gray-900 py-4">
         <Link href="/" className="flex items-center justify-center">
-          <LayoutDashboard className="h-8 w-8 text-white" />
+          <AppWindow className="h-8 w-8 text-white" />
         </Link>
         <nav className="flex flex-1 flex-col items-center space-y-6">
           <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" />
@@ -152,7 +152,7 @@ export function LayoutComponent({ children }: LayoutProps) {
       </aside>
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b px-4 md:px-6">
-          <h1 className="text-2xl font-bold">Hello, {currentUser.name}</h1>
+          <h1 className="text-2xl font-bold">Olá, {currentUser?.name}</h1>
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
