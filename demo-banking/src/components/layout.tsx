@@ -105,16 +105,16 @@ export function LayoutComponent({ children }: LayoutProps) {
   });
   useCopilotChatSuggestions({
     instructions: `
-      You have access to where the user is in the app from copilotkit readables.
-        -if the user is on the cards page,
-          suggest actions/information in this page related to credit cards, transactions or policies.
-          Use specific items or "all items", for example:
-          "Show all transactions of Marketing department" or "Tell me how much I spent on my Mastercard"
-          If the user has permission to e.g. add credit card, then you can suggest to add a new card.
-          Do the same for other actions.
-        -if the user is on the dashboard page,
-          suggest prompts like "describe current view" so that you can provide a summary of the current view.
-          you can also suggest prompts like "show me the recent transactions", "list all policies" or "show me the team".
+      Você tem acesso à página atual pelo copilotkit readables.
+        -se o usuário estiver na página de cartões,
+          sugira ações/informações dessa página ligadas a cartões, transações ou policies.
+          Use itens específicos ou "todos os itens", por exemplo:
+          "Mostre todas as transações do time de Marketing" ou "Quanto eu gastei no meu Mastercard?"
+          Se o usuário tiver permissão, sugira adicionar um novo cartão.
+          Faça o mesmo para outras ações.
+        -se o usuário estiver no dashboard,
+          sugira prompts como "descreva a visão atual" para resumir a tela.
+          você também pode sugerir "mostre as transações recentes", "liste todas as policies" ou "mostre o time".
     `,
     minSuggestions: 3,
     maxSuggestions: 3,

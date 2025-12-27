@@ -53,18 +53,18 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
   useCopilotAction({
     name: "navigateToPageAndPerform",
     description: `
-            Navigate to a page to perform an operation. Use this if you are asked to perform an action outside of page context. For example:
-            The user is viewing a dashboard but asks to make changes to a team member or a credit card.
+            Navegue para uma página para executar uma ação. Use isto se pedirem uma ação fora do contexto da página. Exemplo:
+            O usuário está no dashboard, mas pediu para alterar um membro do time ou um cartão.
             
-            If you are on the cards page for example, and are requested to perform a card related operation, you are allowed to perform it.
+            Se você estiver na página de cartões e pedirem uma ação de cartão, você pode executar.
             
-            If the operation is unavailable, tell the user to navigate themselves to the page.
-            Let them know which page that is.
-            Advise them to re-ask co-pilot once they arrive at the right page.
-            You can suggest making the navigation part yourself
-            Example: "Adding new card is not available in this page. Navigate to "Cards" page and try to ask me again there. Would you like me to take you there?"
+            Se a ação não estiver disponível, peça para o usuário navegar até a página correta.
+            Informe qual é a página.
+            Peça para solicitar novamente ao copiloto quando chegar lá.
+            Você pode sugerir que faz a navegação por ele.
+            Exemplo: "Adicionar novo cartão não está disponível nesta página. Vá para 'Cartões' e peça de novo. Quer que eu te leve até lá?"
             
-            Otherwise, initiate the navigation without asking
+            Caso contrário, inicie a navegação sem perguntar.
         `,
     parameters: [
       {
@@ -94,7 +94,7 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
 
       return (
         <div className="flex items-center justify-center space-x-4 rounded-lg bg-black p-4 text-slate-100">
-          <div>Navigate to {page}?</div>
+          <div>Deseja navegar para {page}?</div>
           <Button
             variant="outline"
             size="icon"
@@ -105,19 +105,19 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
               }`;
               handler?.(page!);
             }}
-            aria-label="Confirm Navigation"
+            aria-label="Confirmar navegação"
             className="h-12 w-12 rounded-full bg-black text-emerald-200 hover:bg-neutral-900 hover:text-emerald-100"
           >
-            Yes
+            Sim
           </Button>
           <Button
             variant="outline"
             size="icon"
             onClick={() => handler?.("cancelled")}
-            aria-label="Cancel Navigation"
+            aria-label="Cancelar navegação"
             className="h-12 w-12 rounded-full bg-black text-neutral-200 hover:bg-neutral-900 hover:text-white"
           >
-            No
+            Não
           </Button>
         </div>
       );

@@ -36,19 +36,19 @@ export default function Team() {
   const operation = searchParams.get("operation") as TeamPageOperations | null;
 
   useCopilotReadable({
-    description: "The available users of the system.",
+    description: "Os usuários disponíveis no sistema.",
     value: team,
   });
 
   useCopilotAction({
     name: "removeMember",
-    description: "Remove a team member",
+    description: "Remover um membro do time",
     parameters: [
       {
         name: "id",
         type: "string",
         description:
-          "The ID of the member to remove (provided by copilot, ask questions to figure out the member)",
+          "O ID do membro a remover (fornecido pelo copilot; faça perguntas para identificar)",
         required: true,
       },
     ],
@@ -57,18 +57,18 @@ export default function Team() {
 
   useCopilotAction({
     name: "changeMemberRole",
-    description: "Change the role of a team member",
+    description: "Alterar o cargo de um membro do time",
     parameters: [
       {
         name: "id",
         type: "string",
-        description: "The ID of the member to change the role of",
+        description: "O ID do membro cujo cargo será alterado",
         required: true,
       },
       {
         name: "role",
         type: "string",
-        description: "The new role of the member",
+        description: "O novo cargo do membro",
         required: true,
       },
     ],
@@ -77,18 +77,18 @@ export default function Team() {
 
   useCopilotAction({
     name: "changeMemberTeam",
-    description: "Change the team of a team member",
+    description: "Alterar o time de um membro",
     parameters: [
       {
         name: "id",
         type: "string",
-        description: "The ID of the member to change the team of",
+        description: "O ID do membro cujo time será alterado",
         required: true,
       },
       {
         name: "team",
         type: "string",
-        description: "The new team of the member",
+        description: "O novo time do membro",
         required: true,
       },
     ],
