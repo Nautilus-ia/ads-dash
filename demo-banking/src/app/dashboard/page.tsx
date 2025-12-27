@@ -1,6 +1,5 @@
 'use client'
 import useCreditCards from "@/app/actions";
-import { useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, CreditCard, DollarSign, ShieldCheck, TrendingUp, Users } from "lucide-react";
@@ -66,30 +65,6 @@ export default function HomePage() {
       .join(" ")
   }
 
-  const { balance, limit } = useMemo(() => {
-    const { balance, limit } = policies.reduce((stats, policy) => {
-      return {
-        balance: stats.balance + policy.spent,
-        limit: {
-          used: stats.limit.used + policy.spent,
-          total: stats.limit.total + policy.limit
-        },
-      }
-    }, { balance: 0, limit: { used: 0, total: 0 } })
-    const limitUsagePercentage = ((limit.used / limit.total) * 100)
-    const remaining = Math.max(limit.total - limit.used, 0)
-
-    return {
-      balance,
-      limit: {
-        total: limit.total,
-        used: limit.used,
-        remaining,
-        usagePercentage: limitUsagePercentage,
-      }
-    }
-  }, [policies])
-
   return (
       <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-black via-slate-950 to-slate-900 text-slate-50">
         <div className="pointer-events-none absolute inset-y-0 left-0 w-48 bg-white/5 blur-3xl" />
@@ -137,53 +112,6 @@ export default function HomePage() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200">Saldo total</CardTitle>
-                    <DollarSign className="h-4 w-4 text-sky-200" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-semibold">{formatCurrency(balance)}</div>
-                    <p className="mt-2 text-xs text-slate-300">Pronto para novas movimentações.</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200">Limite de crédito</CardTitle>
-                    <CreditCard className="h-4 w-4 text-sky-200" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-semibold">{formatCurrency(limit.total)}</div>
-                    <Progress value={limit.usagePercentage} className="mt-3 bg-white/10" />
-                    <div className="mt-3 flex items-center justify-between text-xs text-slate-300">
-                      <span>Disponível</span>
-                      <span className="font-semibold text-emerald-200">{formatCurrency(limit.remaining)}</span>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-300">
-                      {formatCurrency(limit.used)} utilizados ({limit.usagePercentage.toFixed(2)}% do limite)
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur lg:col-span-2">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium text-slate-200">Momento do mês</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <p className="text-lg font-semibold">Foco em liquidez</p>
-                      <p className="text-xs text-slate-300">
-                        Distribuição de gastos estável com margem para imprevistos.
-                      </p>
-                    </div>
-                    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-sky-100">
-                      Status: confortável
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
 
               <div className="grid gap-4 lg:grid-cols-2">
                 <Card className="border-white/10 bg-white/5 text-slate-100 shadow-xl backdrop-blur">
