@@ -17,8 +17,11 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "CoBankKit",
+  title: "DevOpsKit",
   description: "Collaborative finance for 21st century teams",
+  icons: {
+    icon: "/icon.jpg",
+  },
 };
 
 export default function RootLayout({

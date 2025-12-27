@@ -24,6 +24,14 @@ export function TransactionsList({
   approvalInterfaceProps = {},
 }: TransactionsListProps) {
   const [loading, setLoading] = useState(true);
+  const formatDate = (rawDate: string) => {
+    const parsed = new Date(`${rawDate}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) {
+      return rawDate;
+    }
+    return new Intl.DateTimeFormat("pt-BR").format(parsed);
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -88,7 +96,7 @@ export function TransactionsList({
                   compact ? "text-xs" : "text-sm"
                 )}
               >
-                {transaction.date}
+                {formatDate(transaction.date)}
               </p>
             </div>
             <div
@@ -129,7 +137,7 @@ export function TransactionsList({
                     compact ? "text-xs" : "text-sm"
                   )}
                 >
-                  {transaction.note.date}
+                  {formatDate(transaction.note.date)}
                 </p>
               </div>
             </div>

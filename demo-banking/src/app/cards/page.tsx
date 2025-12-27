@@ -22,11 +22,14 @@ export default function HomePage() {
       }
     }, { balance: 0, limit: { used: 0, total: 0 } })
     const limitUsagePercentage = ((limit.used / limit.total) * 100)
+    const remaining = Math.max(limit.total - limit.used, 0)
 
     return {
       balance,
       limit: {
         total: limit.total,
+        used: limit.used,
+        remaining,
         usagePercentage: limitUsagePercentage,
       }
     }
@@ -62,7 +65,15 @@ export default function HomePage() {
                 <CardContent>
                   <div className="text-2xl font-bold">${limit.total}</div>
                   <Progress value={limit.usagePercentage} className="mt-2" />
-                  <p className="text-xs text-neutral-500 mt-2 dark:text-neutral-400">{limit.usagePercentage.toFixed(2)}% used</p>
+                  <div className="mt-3 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                    <span>Disponível</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      ${limit.remaining}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-2 dark:text-neutral-400">
+                    ${limit.used} utilizados ({limit.usagePercentage.toFixed(2)}% do limite)
+                  </p>
                 </CardContent>
               </Card>
             </div>

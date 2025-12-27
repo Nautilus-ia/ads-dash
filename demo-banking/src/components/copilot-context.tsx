@@ -93,7 +93,7 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
       const { page, operation, operationAvailable } = args;
 
       return (
-        <div className="flex items-center justify-center space-x-4 rounded-lg bg-white p-4">
+        <div className="flex items-center justify-center space-x-4 rounded-lg bg-black p-4 text-slate-100">
           <div>Navigate to {page}?</div>
           <Button
             variant="outline"
@@ -106,7 +106,7 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
               handler?.(page!);
             }}
             aria-label="Confirm Navigation"
-            className="h-12 w-12 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
+            className="h-12 w-12 rounded-full bg-black text-emerald-200 hover:bg-neutral-900 hover:text-emerald-100"
           >
             Yes
           </Button>
@@ -115,7 +115,7 @@ const CopilotContext = ({ children }: { children: React.ReactNode }) => {
             size="icon"
             onClick={() => handler?.("cancelled")}
             aria-label="Cancel Navigation"
-            className="h-12 w-12 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-900/20 dark:text-gray-400 dark:hover:bg-gray-900/30 dark:hover:text-gray-300"
+            className="h-12 w-12 rounded-full bg-black text-neutral-200 hover:bg-neutral-900 hover:text-white"
           >
             No
           </Button>

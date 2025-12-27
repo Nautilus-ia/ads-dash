@@ -14,6 +14,58 @@ export default function HomePage() {
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 
+  const cloudSuppliers = [
+    { name: "AWS", monthly: 84500, trend: "+6,8%" },
+    { name: "GCP", monthly: 39200, trend: "+3,1%" },
+    { name: "Azure", monthly: 28750, trend: "-1,4%" },
+    { name: "Cloudflare", monthly: 9600, trend: "+2,2%" },
+  ]
+
+  const monthlyCloudCosts = [
+    { month: "Jan", aws: 76000, gcp: 35200, azure: 26800 },
+    { month: "Fev", aws: 79200, gcp: 36800, azure: 27400 },
+    { month: "Mar", aws: 81000, gcp: 37400, azure: 27900 },
+    { month: "Abr", aws: 82500, gcp: 38600, azure: 28250 },
+    { month: "Mai", aws: 84500, gcp: 39200, azure: 28750 },
+    { month: "Jun", aws: 86800, gcp: 40100, azure: 29400 },
+  ]
+
+  const productCosts = [
+    { name: "Compute", share: 46 },
+    { name: "Storage", share: 22 },
+    { name: "Networking", share: 18 },
+    { name: "Observability", share: 14 },
+  ]
+
+  const lineChart = { width: 600, height: 180, padding: 24 }
+  const supplierMax = Math.max(...cloudSuppliers.map((supplier) => supplier.monthly))
+  const productMax = Math.max(...productCosts.map((product) => product.share))
+  const monthlyTotals = monthlyCloudCosts.map(
+    (month) => month.aws + month.gcp + month.azure
+  )
+  const monthlyAws = monthlyCloudCosts.map((month) => month.aws)
+  const monthlyGcp = monthlyCloudCosts.map((month) => month.gcp)
+  const monthlyAzure = monthlyCloudCosts.map((month) => month.azure)
+  const chartMax = Math.max(
+    ...monthlyTotals,
+    ...monthlyAws,
+    ...monthlyGcp,
+    ...monthlyAzure
+  )
+
+  const buildLinePoints = (values: number[], max: number) => {
+    const { width, height, padding } = lineChart
+    const range = Math.max(max, 1)
+    const step = (width - padding * 2) / (values.length - 1)
+    return values
+      .map((value, index) => {
+        const x = padding + index * step
+        const y = height - padding - (value / range) * (height - padding * 2)
+        return `${x},${y}`
+      })
+      .join(" ")
+  }
+
   const { balance, limit } = useMemo(() => {
     const { balance, limit } = policies.reduce((stats, policy) => {
       return {
@@ -25,11 +77,14 @@ export default function HomePage() {
       }
     }, { balance: 0, limit: { used: 0, total: 0 } })
     const limitUsagePercentage = ((limit.used / limit.total) * 100)
+    const remaining = Math.max(limit.total - limit.used, 0)
 
     return {
       balance,
       limit: {
         total: limit.total,
+        used: limit.used,
+        remaining,
         usagePercentage: limitUsagePercentage,
       }
     }
@@ -57,22 +112,6 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <Card className="rounded-2xl border-white/10 bg-white/5 text-slate-50 shadow-2xl backdrop-blur md:w-80">
-              <CardHeader className="pb-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-200/80">
-                  Pulso semanal
-                </p>
-              </CardHeader>
-              <CardContent className="flex items-center gap-3">
-                <div className="rounded-full bg-sky-500/20 p-2 text-sky-200">
-                  <TrendingUp className="h-6 w-6" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-lg font-semibold leading-none">+12,4%</p>
-                  <p className="text-xs text-slate-200/80">Gastos equilibrados e limite saudável.</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           <Tabs defaultValue="overview" className="space-y-6">
@@ -118,7 +157,13 @@ export default function HomePage() {
                   <CardContent>
                     <div className="text-2xl font-semibold">{formatCurrency(limit.total)}</div>
                     <Progress value={limit.usagePercentage} className="mt-3 bg-white/10" />
-                    <p className="mt-2 text-xs text-slate-300">{limit.usagePercentage.toFixed(2)}% utilizado</p>
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-300">
+                      <span>Disponível</span>
+                      <span className="font-semibold text-emerald-200">{formatCurrency(limit.remaining)}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-slate-300">
+                      {formatCurrency(limit.used)} utilizados ({limit.usagePercentage.toFixed(2)}% do limite)
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -139,6 +184,115 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card className="border-white/10 bg-white/5 text-slate-100 shadow-xl backdrop-blur">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-slate-100">Custos de cloud por fornecedor</CardTitle>
+                    <CardDescription className="text-slate-300">
+                      Visão mensal para comparar tendências e renegociar contratos.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                      {cloudSuppliers.map((supplier) => (
+                        <div key={supplier.name} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-black/30 p-3">
+                          <div className="flex h-24 w-full items-end">
+                            <div
+                              className="w-full rounded-md bg-sky-400/80"
+                              style={{ height: `${(supplier.monthly / supplierMax) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-slate-100">{supplier.name}</span>
+                          <span className="text-[10px] text-slate-400">{formatCurrency(supplier.monthly)}</span>
+                          <span className="text-[10px] font-semibold text-sky-100">{supplier.trend}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-white/10 bg-black/40 text-slate-50 shadow-xl backdrop-blur">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-slate-100">Evolucao mensal do custo cloud</CardTitle>
+                    <CardDescription className="text-slate-300">
+                      AWS, GCP e Azure com comparacao direta por mes.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <svg viewBox={`0 0 ${lineChart.width} ${lineChart.height}`} className="h-44 w-full">
+                        <line
+                          x1={lineChart.padding}
+                          y1={lineChart.height - lineChart.padding}
+                          x2={lineChart.width - lineChart.padding}
+                          y2={lineChart.height - lineChart.padding}
+                          stroke="rgba(255,255,255,0.1)"
+                          strokeWidth="2"
+                        />
+                        <polyline
+                          points={buildLinePoints(monthlyAws, chartMax)}
+                          fill="none"
+                          stroke="rgba(56,189,248,0.9)"
+                          strokeWidth="3"
+                        />
+                        <polyline
+                          points={buildLinePoints(monthlyGcp, chartMax)}
+                          fill="none"
+                          stroke="rgba(16,185,129,0.85)"
+                          strokeWidth="3"
+                        />
+                        <polyline
+                          points={buildLinePoints(monthlyAzure, chartMax)}
+                          fill="none"
+                          stroke="rgba(251,191,36,0.85)"
+                          strokeWidth="3"
+                        />
+                      </svg>
+                      <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400">
+                        <span className="text-slate-200">Total: {formatCurrency(monthlyTotals[monthlyTotals.length - 1])}</span>
+                        <div className="flex flex-wrap gap-3">
+                          <span className="text-sky-200">AWS</span>
+                          <span className="text-emerald-200">GCP</span>
+                          <span className="text-amber-200">Azure</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-slate-400 sm:grid-cols-6">
+                      {monthlyCloudCosts.map((month) => (
+                        <div key={month.month} className="rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-center">
+                          {month.month}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-slate-100">Distribuicao de custo por produto</CardTitle>
+                  <CardDescription className="text-slate-300">
+                    Ajuda a identificar se um SKU esta dominando o crescimento.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    {productCosts.map((product) => (
+                      <div key={product.name} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-black/30 p-3">
+                        <div className="flex h-24 w-full items-end">
+                          <div
+                            className="w-full rounded-md bg-emerald-400/80"
+                            style={{ height: `${(product.share / productMax) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-slate-100">{product.name}</span>
+                        <span className="text-[10px] text-slate-400">{product.share}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="col-span-4 border-white/10 bg-white/5 text-slate-100 shadow-xl backdrop-blur">
@@ -185,59 +339,54 @@ export default function HomePage() {
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200">MRR (recorrente)</CardTitle>
+                    <CardTitle className="text-sm font-medium text-slate-200">Custo cloud do mês</CardTitle>
                     <DollarSign className="h-4 w-4 text-sky-200" />
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <p className="text-lg font-semibold">{formatCurrency(120000)}</p>
-                    <p className="text-xs text-slate-300">Últimos 30 dias · crescimento de +4,3% MoM.</p>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(monthlyTotals[monthlyTotals.length - 1])}
+                    </p>
+                    <p className="text-xs text-slate-300">Resumo mensal consolidado das clouds.</p>
                     <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-sky-100">
-                      Receita recorrente saudável e previsível.
+                      Crescimento de +4,1% vs mês anterior.
                     </div>
                   </CardContent>
                 </Card>
 
                 <Card className="border-white/10 bg-black/40 text-slate-50 shadow-xl backdrop-blur">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200">LTV médio</CardTitle>
-                    <Users className="h-4 w-4 text-sky-200" />
+                    <CardTitle className="text-sm font-medium text-slate-200">Custo por receita</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-sky-200" />
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-lg font-semibold">{formatCurrency(4200)}</p>
-                    <p className="text-xs text-slate-300">Base ativa · LTV/CAC em 3,4x (meta ≥ 3x).</p>
-                    <Progress value={72} className="bg-white/10" />
-                    <p className="text-xs text-slate-300">Retenção estável, churn controlado.</p>
+                    <p className="text-lg font-semibold">18,4%</p>
+                    <p className="text-xs text-slate-300">Percentual do faturamento destinado a cloud.</p>
+                    <Progress value={68} className="bg-white/10" />
+                    <p className="text-xs text-slate-300">Meta interna: ≤ 20%.</p>
                   </CardContent>
                 </Card>
 
                 <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200">Investimento por produto</CardTitle>
+                    <CardTitle className="text-sm font-medium text-slate-200">Top fornecedores</CardTitle>
                     <BarChart3 className="h-4 w-4 text-sky-200" />
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="space-y-2 text-sm text-slate-300">
-                      <div className="flex items-center justify-between">
-                        <span>App banking</span>
-                        <span>{formatCurrency(120000)}</span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-white/10">
-                        <div className="h-2 rounded-full bg-sky-400/70" style={{ width: "64%" }} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Plataforma B2B</span>
-                        <span>{formatCurrency(85000)}</span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-white/10">
-                        <div className="h-2 rounded-full bg-sky-400/70" style={{ width: "45%" }} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Gateway</span>
-                        <span>{formatCurrency(54000)}</span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-white/10">
-                        <div className="h-2 rounded-full bg-sky-400/70" style={{ width: "32%" }} />
-                      </div>
+                      {cloudSuppliers.slice(0, 3).map((supplier) => (
+                        <div key={supplier.name} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span>{supplier.name}</span>
+                            <span>{formatCurrency(supplier.monthly)}</span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-white/10">
+                            <div
+                              className="h-2 rounded-full bg-sky-400/70"
+                              style={{ width: `${(supplier.monthly / supplierMax) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -245,26 +394,26 @@ export default function HomePage() {
 
               <Card className="border-white/10 bg-black/40 text-slate-50 shadow-xl backdrop-blur">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-slate-100">Pulso financeiro e técnico</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-slate-100">Gestao de custos por cloud</CardTitle>
                   <CardDescription className="text-slate-300">
-                    Correlação entre MRR, LTV e ROE para priorizar produtos e squads.
+                    Sinaliza oportunidades de otimizacao e contratos a renegociar.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-3">
                   <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-sm text-slate-300">MRR previsto</p>
-                    <p className="text-xl font-semibold text-sky-100">{formatCurrency(132000)}</p>
-                    <p className="text-xs text-slate-400">+3,1% vs mês anterior</p>
+                    <p className="text-sm text-slate-300">Spot vs reservado</p>
+                    <p className="text-xl font-semibold text-sky-100">62% reservado</p>
+                    <p className="text-xs text-slate-400">Meta: 70% para reduzir volatilidade.</p>
                   </div>
                   <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-sm text-slate-300">ROE consolidado</p>
-                    <p className="text-xl font-semibold text-sky-100">14,2%</p>
-                    <p className="text-xs text-slate-400">Patrimônio vs lucro anualizado</p>
+                    <p className="text-sm text-slate-300">Servicos em alerta</p>
+                    <p className="text-xl font-semibold text-sky-100">5 ativos</p>
+                    <p className="text-xs text-slate-400">Compute e storage acima do baseline.</p>
                   </div>
                   <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-sm text-slate-300">LTV/CAC</p>
-                    <p className="text-xl font-semibold text-sky-100">3,4x</p>
-                    <p className="text-xs text-slate-400">Acima do alvo mínimo de 3x</p>
+                    <p className="text-sm text-slate-300">Economia potencial</p>
+                    <p className="text-xl font-semibold text-sky-100">{formatCurrency(18500)}</p>
+                    <p className="text-xs text-slate-400">Rightsizing e reservas anuais.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -274,16 +423,16 @@ export default function HomePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <Card className="border-white/10 bg-white/5 text-slate-50 shadow-xl backdrop-blur">
                   <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-slate-100">Relatórios executivos</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-slate-100">Relatorios de custo cloud</CardTitle>
                     <CardDescription className="text-slate-300">
-                      Em uma visão: burn rate, run rate e mapa de riscos financeiros.
+                      Projecoes, alocacao por centro de custo e contratacao.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
                       <div>
-                        <p className="font-medium text-slate-100">Burn rate consolidado</p>
-                        <p className="text-xs text-slate-300">Atualizado hoje às 08:00</p>
+                        <p className="font-medium text-slate-100">Forecast por fornecedor</p>
+                        <p className="text-xs text-slate-300">Proximos 90 dias por cloud.</p>
                       </div>
                       <Button variant="outline" asChild className="border-white/20 text-slate-100 hover:bg-white/10">
                         <a href="/">Exportar</a>
@@ -291,8 +440,17 @@ export default function HomePage() {
                     </div>
                     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
                       <div>
-                        <p className="font-medium text-slate-100">Runway dos squads</p>
-                        <p className="text-xs text-slate-300">Projeção com base no consumo de cartões</p>
+                        <p className="font-medium text-slate-100">Alocacao por produto</p>
+                        <p className="text-xs text-slate-300">Compute, storage e networking.</p>
+                      </div>
+                      <Button variant="outline" asChild className="border-white/20 text-slate-100 hover:bg-white/10">
+                        <a href="/">Exportar</a>
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 p-3 text-sm">
+                      <div>
+                        <p className="font-medium text-slate-100">Reservas e compromissos</p>
+                        <p className="text-xs text-slate-300">Economia projetada por contrato.</p>
                       </div>
                       <Button variant="outline" asChild className="border-white/20 text-slate-100 hover:bg-white/10">
                         <a href="/">Exportar</a>
@@ -303,30 +461,30 @@ export default function HomePage() {
 
                 <Card className="border-white/10 bg-black/40 text-slate-50 shadow-xl backdrop-blur">
                   <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-slate-100">Alertas e governança</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-slate-100">Governanca de custos cloud</CardTitle>
                     <CardDescription className="text-slate-300">
-                      Centralize decisões e auditoria para softwares e despesas.
+                      Alertas, orcamentos e conformidade por fornecedor.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3 text-sm">
                       <div>
-                        <p className="font-medium text-slate-100">Policy de gastos</p>
-                        <p className="text-xs text-slate-300">Limite de time em revisão</p>
+                        <p className="font-medium text-slate-100">Budget estourando</p>
+                        <p className="text-xs text-slate-300">AWS acima de 92% do teto.</p>
                       </div>
-                      <span className="rounded-full bg-sky-500/20 px-3 py-1 text-xs text-sky-100">Ajustar</span>
+                      <span className="rounded-full bg-sky-500/20 px-3 py-1 text-xs text-sky-100">Revisar</span>
                     </div>
                     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3 text-sm">
                       <div>
-                        <p className="font-medium text-slate-100">Acesso a softwares</p>
-                        <p className="text-xs text-slate-300">Auditoria semanal programada</p>
+                        <p className="font-medium text-slate-100">Desvios detectados</p>
+                        <p className="text-xs text-slate-300">GCP acima do baseline em 12%.</p>
                       </div>
-                      <span className="rounded-full bg-sky-500/20 px-3 py-1 text-xs text-sky-100">Saudável</span>
+                      <span className="rounded-full bg-sky-500/20 px-3 py-1 text-xs text-sky-100">Analisar</span>
                     </div>
                     <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3 text-sm">
                       <div>
-                        <p className="font-medium text-slate-100">Contratos renovação</p>
-                        <p className="text-xs text-slate-300">Licenças vencendo em 30 dias</p>
+                        <p className="font-medium text-slate-100">Contratos a vencer</p>
+                        <p className="text-xs text-slate-300">Azure commit termina em 45 dias.</p>
                       </div>
                       <span className="rounded-full bg-sky-500/20 px-3 py-1 text-xs text-sky-100">Planejar</span>
                     </div>
